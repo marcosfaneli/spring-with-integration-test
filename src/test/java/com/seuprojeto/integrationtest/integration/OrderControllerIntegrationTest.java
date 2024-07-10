@@ -144,4 +144,11 @@ class OrderControllerIntegrationTest {
                 .andExpect(status().isNotFound())
                 .andReturn();
     }
+
+    @Test
+    void shouldReturn404WhenGetAnNonExistentOrder() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get(ORDER_URL + "/123"))
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
 }

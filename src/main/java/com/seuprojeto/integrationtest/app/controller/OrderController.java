@@ -39,7 +39,7 @@ public class OrderController {
 
     @PutMapping("/{id}")
     public OrderCreatedDto updateOrder(@PathVariable String id, @RequestBody UpdateOrderDto updateOrderDto) {
-        final UUID uuid = UUID.fromString(id);
+        final UUID uuid = getUuid(id);
         final Order order = this.repository.findById(uuid).orElseThrow();
         order.update(updateOrderDto.description(), updateOrderDto.status());
         final Order orderSaved = this.repository.save(order);
@@ -48,7 +48,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public OrderCreatedDto getOrder(@PathVariable String id) {
-        final UUID uuid = UUID.fromString(id);
+        final UUID uuid = getUuid(id);
         final Order order = this.repository.findById(uuid).orElseThrow(() -> new OrderNotFoundException(id));
         return OrderCreatedDto.from(order);
     }
@@ -56,7 +56,15 @@ public class OrderController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteOrder(@PathVariable String id) {
-        final UUID uuid = UUID.fromString(id);
+        final UUID uuid = getUuid(id);
         this.repository.deleteById(uuid);
+    }
+
+    private static UUID getUuid(String id) {
+        try {
+            return UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new OrderNotFoundException(id);
+        }
     }
 }
