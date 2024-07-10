@@ -22,8 +22,10 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<?> getAllOrders() {
-        return List.of();
+    public List<OrderCreatedDto> getAllOrders() {
+        return this.repository.findAll().stream()
+                .map(OrderCreatedDto::from)
+                .toList();
     }
 
     @PostMapping

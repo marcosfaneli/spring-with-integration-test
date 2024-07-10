@@ -3,8 +3,10 @@ package com.seuprojeto.integrationtest.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
+import com.seuprojeto.integrationtest.infra.OrderRepository;
 import com.seuprojeto.integrationtest.integration.app.controller.dto.UpdateOrderDto;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +26,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMockMvc
 @EnableConfigurationProperties
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class OrderControllerIntegrationTest {
+
+    @Autowired
+    OrderRepository orderRepository;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -35,11 +40,18 @@ class OrderControllerIntegrationTest {
     @Autowired
     MockMvc mockMvc;
 
+    @BeforeEach
+    void setUp() {
+         this.orderRepository.deleteAll();
+    }
+
     @Test
     void shouldReturn200WhenGetAllOrders() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(ORDER_URL))
+        final MvcResult response = mockMvc.perform(MockMvcRequestBuilders.get(ORDER_URL))
                 .andExpect(status().isOk())
                 .andReturn();
+
+        Assertions.assertTrue(response.getResponse().getContentAsString().contains("[]"));
     }
 
     @Test
