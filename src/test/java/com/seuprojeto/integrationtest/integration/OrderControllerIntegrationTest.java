@@ -124,4 +124,20 @@ class OrderControllerIntegrationTest {
         Assertions.assertEquals(orderCreatedDto.description(), getOrderCreatedDto.description());
         Assertions.assertEquals(orderCreatedDto.status(), getOrderCreatedDto.status());
     }
+
+    @Test
+    void shouldReturn204WhenDeleteAnExistentOrder() throws Exception {
+        final String description = "some description";
+        final CreateOrderDto createOrderDto = new CreateOrderDto(description);
+        final String payload = objectMapper.writeValueAsString(createOrderDto);
+
+        final MvcResult response = this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        final OrderCreatedDto orderCreatedDto = objectMapper.readValue(response.getResponse().getContentAsString(), OrderCreatedDto.class);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.delete(ORDER_URL + "/" + orderCreatedDto.id()))
+                .andExpect(status().isNoContent());
+    }
 }

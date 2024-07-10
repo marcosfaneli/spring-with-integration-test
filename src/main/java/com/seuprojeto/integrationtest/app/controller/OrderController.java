@@ -51,4 +51,11 @@ public class OrderController {
         final Order order = this.repository.findById(uuid).orElseThrow();
         return OrderCreatedDto.from(order);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteOrder(@PathVariable String id) {
+        final UUID uuid = UUID.fromString(id);
+        this.repository.deleteById(uuid);
+    }
 }
