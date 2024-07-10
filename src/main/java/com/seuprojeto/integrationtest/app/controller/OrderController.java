@@ -3,6 +3,7 @@ package com.seuprojeto.integrationtest.app.controller;
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
 import com.seuprojeto.integrationtest.domain.Order;
+import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
 import com.seuprojeto.integrationtest.infra.OrderRepository;
 import com.seuprojeto.integrationtest.integration.app.controller.dto.UpdateOrderDto;
 import org.springframework.http.HttpStatus;
@@ -48,7 +49,7 @@ public class OrderController {
     @GetMapping("/{id}")
     public OrderCreatedDto getOrder(@PathVariable String id) {
         final UUID uuid = UUID.fromString(id);
-        final Order order = this.repository.findById(uuid).orElseThrow();
+        final Order order = this.repository.findById(uuid).orElseThrow(() -> new OrderNotFoundException(id));
         return OrderCreatedDto.from(order);
     }
 

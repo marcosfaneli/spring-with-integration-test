@@ -139,5 +139,9 @@ class OrderControllerIntegrationTest {
 
         this.mockMvc.perform(MockMvcRequestBuilders.delete(ORDER_URL + "/" + orderCreatedDto.id()))
                 .andExpect(status().isNoContent());
+
+        this.mockMvc.perform(MockMvcRequestBuilders.get(ORDER_URL + "/" + orderCreatedDto.id()))
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 }
