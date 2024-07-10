@@ -102,4 +102,26 @@ class OrderControllerIntegrationTest {
         Assertions.assertEquals(newDescription, updatedOrderCreatedDto.description());
         Assertions.assertEquals(newStatus, updatedOrderCreatedDto.status());
     }
+
+    @Test
+    void shouldReturn200WhenGetAnExistentOrder() throws Exception {
+        final String description = "some description";
+        final CreateOrderDto createOrderDto = new CreateOrderDto(description);
+        final String payload = objectMapper.writeValueAsString(createOrderDto);
+
+        final MvcResult response = this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        final OrderCreatedDto orderCreatedDto = objectMapper.readValue(response.getResponse().getContentAsString(), OrderCreatedDto.class);
+
+        final MvcResult getResponse = this.mockMvc.perform(MockMvcRequestBuilders.get(ORDER_URL + "/" + orderCreatedDto.id()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final OrderCreatedDto getOrderCreatedDto = objectMapper.readValue(getResponse.getResponse().getContentAsString(), OrderCreatedDto.class);
+        Assertions.assertEquals(orderCreatedDto.id(), getOrderCreatedDto.id());
+        Assertions.assertEquals(orderCreatedDto.description(), getOrderCreatedDto.description());
+        Assertions.assertEquals(orderCreatedDto.status(), getOrderCreatedDto.status());
+    }
 }

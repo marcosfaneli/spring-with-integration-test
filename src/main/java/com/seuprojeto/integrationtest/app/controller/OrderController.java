@@ -44,4 +44,11 @@ public class OrderController {
         final Order orderSaved = this.repository.save(order);
         return OrderCreatedDto.from(orderSaved);
     }
+
+    @GetMapping("/{id}")
+    public OrderCreatedDto getOrder(@PathVariable String id) {
+        final UUID uuid = UUID.fromString(id);
+        final Order order = this.repository.findById(uuid).orElseThrow();
+        return OrderCreatedDto.from(order);
+    }
 }
