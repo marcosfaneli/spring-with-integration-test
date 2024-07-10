@@ -1,1 +1,11 @@
-spring.application.name=integrationtest
+spring:
+  application:
+  name: integration-test
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=public
+    username: postgres
+    password: postgres
+  jpa:
+    ddl-auto: update
+    show-sql: true
