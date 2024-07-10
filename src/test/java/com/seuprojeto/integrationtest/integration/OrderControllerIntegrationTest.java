@@ -3,6 +3,7 @@ package com.seuprojeto.integrationtest.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
+import com.seuprojeto.integrationtest.integration.app.controller.dto.UpdateOrderDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -62,5 +63,31 @@ class OrderControllerIntegrationTest {
         Assertions.assertNotNull(orderCreatedDto.createdAt());
         Assertions.assertNotNull(orderCreatedDto.updatedAt());
         Assertions.assertEquals("OPENED", orderCreatedDto.status());
+    }
+
+    @Test
+    void shouldReturn200WhenPutAnExistentOrder() throws Exception {
+        final String description = "some description";
+        final CreateOrderDto createOrderDto = new CreateOrderDto(description);
+        final String payload = objectMapper.writeValueAsString(createOrderDto);
+
+        final MvcResult response = this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        final OrderCreatedDto orderCreatedDto = objectMapper.readValue(response.getResponse().getContentAsString(), OrderCreatedDto.class);
+
+        final String newDescription = "new description";
+        final String newStatus = "CLOSED";
+        final UpdateOrderDto updateOrderDto = new UpdateOrderDto(newDescription, newStatus);
+        final String updatePayload = objectMapper.writeValueAsString(updateOrderDto);
+
+        final MvcResult updateResponse = this.mockMvc.perform(MockMvcRequestBuilders.put(ORDER_URL + "/" + orderCreatedDto.id()).content(updatePayload).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final OrderCreatedDto updatedOrderCreatedDto = objectMapper.readValue(updateResponse.getResponse().getContentAsString(), OrderCreatedDto.class);
+        Assertions.assertEquals(newDescription, updatedOrderCreatedDto.description());
+        Assertions.assertEquals(newStatus, updatedOrderCreatedDto.status());
     }
 }

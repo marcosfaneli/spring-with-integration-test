@@ -51,4 +51,10 @@ public class Order {
     public Status getStatus() {
         return status;
     }
+
+    public void update(String description, String status) {
+        this.description = description;
+        this.status = Status.valueOf(status.toUpperCase());
+        this.updatedAt = LocalDateTime.now();
+    }
 }
