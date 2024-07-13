@@ -2,6 +2,7 @@ package com.seuprojeto.integrationtest.app.controller;
 
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
+import com.seuprojeto.integrationtest.app.usecase.CreateOrder;
 import com.seuprojeto.integrationtest.domain.Order;
 import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
 import com.seuprojeto.integrationtest.infra.OrderRepository;
@@ -18,8 +19,13 @@ public class OrderController {
 
     private final OrderRepository repository;
 
-    public OrderController(OrderRepository repository) {
+    private final CreateOrder createOrder;
+
+    public OrderController(
+            OrderRepository repository,
+            CreateOrder createOrder) {
         this.repository = repository;
+        this.createOrder = createOrder;
     }
 
     @GetMapping
@@ -32,9 +38,7 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderCreatedDto createOrder(@RequestBody CreateOrderDto createOrderDto) {
-        final Order order = Order.create(createOrderDto.description());
-        final Order orderSaved = this.repository.save(order);
-        return OrderCreatedDto.from(orderSaved);
+        return OrderCreatedDto.from(this.createOrder.execute(createOrderDto));
     }
 
     @PutMapping("/{id}")
