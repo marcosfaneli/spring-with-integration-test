@@ -2,24 +2,16 @@ package com.seuprojeto.integrationtest.app.controller;
 
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
-import com.seuprojeto.integrationtest.app.usecase.CreateOrder;
-import com.seuprojeto.integrationtest.app.usecase.ListOrders;
-import com.seuprojeto.integrationtest.app.usecase.UpdateOrder;
-import com.seuprojeto.integrationtest.domain.Order;
-import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
-import com.seuprojeto.integrationtest.infra.OrderRepository;
+import com.seuprojeto.integrationtest.app.usecase.*;
 import com.seuprojeto.integrationtest.integration.app.controller.dto.UpdateOrderDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
-
-    private final OrderRepository repository;
 
     private final CreateOrder createOrder;
 
@@ -27,13 +19,21 @@ public class OrderController {
 
     private final UpdateOrder updateOrder;
 
+    private final GetOrderById getOrderById;
+
+    private final DeleteOrder deleteOrder;
+
     public OrderController(
-            OrderRepository repository,
-            CreateOrder createOrder, ListOrders listOrders, UpdateOrder updateOrder) {
-        this.repository = repository;
+            CreateOrder createOrder,
+            ListOrders listOrders,
+            UpdateOrder updateOrder,
+            GetOrderById getOrderById,
+            DeleteOrder deleteOrder) {
         this.createOrder = createOrder;
         this.listOrders = listOrders;
         this.updateOrder = updateOrder;
+        this.getOrderById = getOrderById;
+        this.deleteOrder = deleteOrder;
     }
 
     @GetMapping
@@ -56,23 +56,13 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public OrderCreatedDto getOrder(@PathVariable String id) {
-        final UUID uuid = getUuid(id);
-        final Order order = this.repository.findById(uuid).orElseThrow(() -> new OrderNotFoundException(id));
-        return OrderCreatedDto.from(order);
+        return OrderCreatedDto.from(this.getOrderById.execute(id));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteOrder(@PathVariable String id) {
-        final UUID uuid = getUuid(id);
-        this.repository.deleteById(uuid);
+        this.deleteOrder.execute(id);
     }
 
-    private static UUID getUuid(String id) {
-        try {
-            return UUID.fromString(id);
-        } catch (IllegalArgumentException e) {
-            throw new OrderNotFoundException(id);
-        }
-    }
 }
