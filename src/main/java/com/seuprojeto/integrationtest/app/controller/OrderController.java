@@ -3,6 +3,8 @@ package com.seuprojeto.integrationtest.app.controller;
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
 import com.seuprojeto.integrationtest.app.usecase.CreateOrder;
+import com.seuprojeto.integrationtest.app.usecase.ListOrders;
+import com.seuprojeto.integrationtest.app.usecase.UpdateOrder;
 import com.seuprojeto.integrationtest.domain.Order;
 import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
 import com.seuprojeto.integrationtest.infra.OrderRepository;
@@ -21,16 +23,22 @@ public class OrderController {
 
     private final CreateOrder createOrder;
 
+    private final ListOrders listOrders;
+
+    private final UpdateOrder updateOrder;
+
     public OrderController(
             OrderRepository repository,
-            CreateOrder createOrder) {
+            CreateOrder createOrder, ListOrders listOrders, UpdateOrder updateOrder) {
         this.repository = repository;
         this.createOrder = createOrder;
+        this.listOrders = listOrders;
+        this.updateOrder = updateOrder;
     }
 
     @GetMapping
     public List<OrderCreatedDto> getAllOrders() {
-        return this.repository.findAll().stream()
+        return this.listOrders.execute().stream()
                 .map(OrderCreatedDto::from)
                 .toList();
     }
@@ -43,11 +51,7 @@ public class OrderController {
 
     @PutMapping("/{id}")
     public OrderCreatedDto updateOrder(@PathVariable String id, @RequestBody UpdateOrderDto updateOrderDto) {
-        final UUID uuid = getUuid(id);
-        final Order order = this.repository.findById(uuid).orElseThrow();
-        order.update(updateOrderDto.description(), updateOrderDto.status());
-        final Order orderSaved = this.repository.save(order);
-        return OrderCreatedDto.from(orderSaved);
+        return OrderCreatedDto.from(this.updateOrder.execute(id, updateOrderDto));
     }
 
     @GetMapping("/{id}")
