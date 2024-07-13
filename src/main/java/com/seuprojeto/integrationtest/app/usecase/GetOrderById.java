@@ -16,8 +16,7 @@ public class GetOrderById {
         this.repository = repository;
     }
 
-    public Order execute(String id) {
-        final UUID uuid = UUIDConverter.fromIdToUuid(id);
-        return this.repository.findById(uuid).orElseThrow(() -> new OrderNotFoundException(id));
+    public Order execute(UUID id) {
+        return this.repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id.toString()));
     }
 }

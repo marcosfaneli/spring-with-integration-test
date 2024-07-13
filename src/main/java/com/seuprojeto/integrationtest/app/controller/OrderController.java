@@ -3,11 +3,13 @@ package com.seuprojeto.integrationtest.app.controller;
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
 import com.seuprojeto.integrationtest.app.usecase.*;
+import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
 import com.seuprojeto.integrationtest.integration.app.controller.dto.UpdateOrderDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/orders")
@@ -51,18 +53,25 @@ public class OrderController {
 
     @PutMapping("/{id}")
     public OrderCreatedDto updateOrder(@PathVariable String id, @RequestBody UpdateOrderDto updateOrderDto) {
-        return OrderCreatedDto.from(this.updateOrder.execute(id, updateOrderDto));
+        return OrderCreatedDto.from(this.updateOrder.execute(getUuid(id), updateOrderDto));
     }
 
     @GetMapping("/{id}")
     public OrderCreatedDto getOrder(@PathVariable String id) {
-        return OrderCreatedDto.from(this.getOrderById.execute(id));
+        return OrderCreatedDto.from(this.getOrderById.execute(getUuid(id)));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteOrder(@PathVariable String id) {
-        this.deleteOrder.execute(id);
+        this.deleteOrder.execute(getUuid(id));
     }
 
+    private static UUID getUuid(String id) {
+        try {
+            return UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new OrderNotFoundException(id);
+        }
+    }
 }

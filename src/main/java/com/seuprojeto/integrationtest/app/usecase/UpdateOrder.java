@@ -17,9 +17,8 @@ public class UpdateOrder {
         this.repository = repository;
     }
 
-    public Order execute(String id, UpdateOrderDto updateOrderDto) {
-        final UUID uuid = UUIDConverter.fromIdToUuid(id);
-        final Order order = this.repository.findById(uuid).orElseThrow(() -> new OrderNotFoundException(id));
+    public Order execute(UUID id, UpdateOrderDto updateOrderDto) {
+        final Order order = this.repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id.toString()));
         order.update(updateOrderDto.description(), updateOrderDto.status());
 
         return this.repository.save(order);

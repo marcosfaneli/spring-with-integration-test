@@ -14,8 +14,7 @@ public class DeleteOrder {
         this.repository = repository;
     }
 
-    public void execute(String id) {
-        final UUID uuid = UUIDConverter.fromIdToUuid(id);
-        this.repository.deleteById(uuid);
+    public void execute(UUID id) {
+        this.repository.deleteById(id);
     }
 }
