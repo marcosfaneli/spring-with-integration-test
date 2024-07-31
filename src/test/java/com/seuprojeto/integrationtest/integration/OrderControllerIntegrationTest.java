@@ -1,26 +1,26 @@
 package com.seuprojeto.integrationtest.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
+import com.seuprojeto.integrationtest.fixture.CreateOrderFixture;
 import com.seuprojeto.integrationtest.infra.OrderRepository;
 import com.seuprojeto.integrationtest.integration.app.controller.dto.UpdateOrderDto;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.regex.Pattern;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -33,16 +33,37 @@ class OrderControllerIntegrationTest {
     @Autowired
     OrderRepository orderRepository;
 
+    @Autowired
+    MockMvc mockMvc;
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String ORDER_URL = "/orders";
 
-    @Autowired
-    MockMvc mockMvc;
+    private static WireMockServer wireMockServer;
+
+    @BeforeAll
+    static void setUpWireMock() {
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(666));
+        wireMockServer.start();
+
+        final CreateOrderDto createOrderDto = CreateOrderFixture.createOrderDto();
+        final String customerCode = createOrderDto.customerCode();
+
+        wireMockServer.stubFor(get(urlEqualTo("/api/customers/" + customerCode))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"id\": \"" + customerCode + "\", \"name\": \"John Doe\"}")));
+    }
+
+    @AfterAll
+    static void tearDownWireMock() {
+        wireMockServer.stop();
+    }
 
     @BeforeEach
     void setUp() {
-         this.orderRepository.deleteAll();
+        orderRepository.deleteAll();
     }
 
     @Test
@@ -56,8 +77,8 @@ class OrderControllerIntegrationTest {
 
     @Test
     void shouldReturn201WhenCreateOrder() throws Exception {
-        final String description = "some description";
-        final CreateOrderDto createOrderDto = new CreateOrderDto(description);
+        final CreateOrderDto createOrderDto = CreateOrderFixture.createOrderDto();
+
         final String payload = objectMapper.writeValueAsString(createOrderDto);
 
         final MvcResult response = this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
@@ -71,7 +92,9 @@ class OrderControllerIntegrationTest {
         Assertions.assertNotNull(orderCreatedDto.id());
         Assertions.assertTrue(pattern.matcher(orderCreatedDto.id()).matches());
 
-        Assertions.assertEquals(description, orderCreatedDto.description());
+        Assertions.assertEquals(createOrderDto.description(), orderCreatedDto.description());
+        Assertions.assertEquals(createOrderDto.customerCode(), orderCreatedDto.customerCode());
+        Assertions.assertNotNull(orderCreatedDto.customerName());
         Assertions.assertNotNull(orderCreatedDto.createdAt());
         Assertions.assertNotNull(orderCreatedDto.updatedAt());
         Assertions.assertEquals("OPENED", orderCreatedDto.status());
@@ -79,8 +102,7 @@ class OrderControllerIntegrationTest {
 
     @Test
     void shouldReturn200WhenPutAnExistentOrder() throws Exception {
-        final String description = "some description";
-        final CreateOrderDto createOrderDto = new CreateOrderDto(description);
+        final CreateOrderDto createOrderDto = CreateOrderFixture.createOrderDto();
         final String payload = objectMapper.writeValueAsString(createOrderDto);
 
         final MvcResult response = this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
@@ -105,8 +127,7 @@ class OrderControllerIntegrationTest {
 
     @Test
     void shouldReturn200WhenGetAnExistentOrder() throws Exception {
-        final String description = "some description";
-        final CreateOrderDto createOrderDto = new CreateOrderDto(description);
+        final CreateOrderDto createOrderDto = CreateOrderFixture.createOrderDto();
         final String payload = objectMapper.writeValueAsString(createOrderDto);
 
         final MvcResult response = this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
@@ -127,8 +148,7 @@ class OrderControllerIntegrationTest {
 
     @Test
     void shouldReturn204WhenDeleteAnExistentOrder() throws Exception {
-        final String description = "some description";
-        final CreateOrderDto createOrderDto = new CreateOrderDto(description);
+        final CreateOrderDto createOrderDto = CreateOrderFixture.createOrderDto();
         final String payload = objectMapper.writeValueAsString(createOrderDto);
 
         final MvcResult response = this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))

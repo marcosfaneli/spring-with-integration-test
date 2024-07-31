@@ -5,9 +5,13 @@ spring:
     username: sa
     password: password
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     ddl-auto: create-drop
     show-sql: true
   h2:
     console:
     enabled: true
+
+customer:
+  api:
+    url: http://localhost:666/api/customers

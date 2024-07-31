@@ -16,20 +16,24 @@ public class Order {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Status status;
+    @ManyToOne
+    @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    private Customer customer;
 
     public Order() {
     }
 
-    public Order(UUID id, String description, LocalDateTime createdAt, LocalDateTime updatedAt, Status status) {
+    public Order(UUID id, String description, LocalDateTime createdAt, LocalDateTime updatedAt, Status status, Customer customer) {
         this.id = id;
         this.description = description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.status = status;
+        this.customer = customer;
     }
 
-    public static Order create(String description) {
-        return new Order(UUID.randomUUID(), description, LocalDateTime.now(), LocalDateTime.now(), Status.OPENED);
+    public static Order create(String description, Customer customer) {
+        return new Order(UUID.randomUUID(), description, LocalDateTime.now(), LocalDateTime.now(), Status.OPENED, customer);
     }
 
     public UUID getId() {
@@ -52,9 +56,13 @@ public class Order {
         return status;
     }
 
+    public Customer getCustomer() {
+        return customer;
+    }
+
     public void update(String description, String status) {
         this.description = description;
-        this.status = Status.valueOf(status.toUpperCase());
+        this.status = Status.fromString(status);
         this.updatedAt = LocalDateTime.now();
     }
 }
