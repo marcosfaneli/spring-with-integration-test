@@ -22,11 +22,11 @@ public class CustomerService {
     }
 
     public Customer findById(String id) {
-        final String url = customerApiUrl +"/" + id;
+        final String url = customerApiUrl +"/{id}";
 
         final Customer customer = new RestTemplateBuilder()
                 .build()
-                .getForObject(url, Customer.class);
+                .getForObject(url, Customer.class, id);
 
         final Optional<Customer> foundCustomer = this.customerRepository.findById(id);
 
