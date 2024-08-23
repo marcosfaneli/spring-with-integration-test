@@ -11,3 +11,7 @@ spring:
   h2:
     console:
     enabled: true
+
+customer:
+  api:
+    url: http://localhost:9999/api/customers

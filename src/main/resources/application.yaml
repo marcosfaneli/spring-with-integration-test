@@ -9,3 +9,7 @@ spring:
   jpa:
     ddl-auto: update
     show-sql: true
+
+customer:
+  api:
+    url: http://localhost:9999/api/customers

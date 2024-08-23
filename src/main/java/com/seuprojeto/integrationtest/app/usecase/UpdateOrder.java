@@ -3,7 +3,7 @@ package com.seuprojeto.integrationtest.app.usecase;
 import com.seuprojeto.integrationtest.domain.Order;
 import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
 import com.seuprojeto.integrationtest.infra.OrderRepository;
-import com.seuprojeto.integrationtest.integration.app.controller.dto.UpdateOrderDto;
+import com.seuprojeto.integrationtest.app.controller.dto.UpdateOrderDto;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
