@@ -22,20 +22,24 @@ public class CustomerService {
     }
 
     public Customer findById(String id) {
-        final String url = customerApiUrl +"/{id}";
+        return this.customerRepository.findById(id)
+                .orElseGet(() -> queryCustomerApi(id)
+                        .orElseThrow(() -> new CustomerNotFoundException(id)));
+    }
 
-        final Customer customer = new RestTemplateBuilder()
-                .build()
-                .getForObject(url, Customer.class, id);
+    private Optional<Customer> queryCustomerApi(String id) {
+        try {
+            final String url = customerApiUrl + "/{id}";
 
-        final Optional<Customer> foundCustomer = this.customerRepository.findById(id);
+            Optional<Customer> customer = Optional.ofNullable(new RestTemplateBuilder()
+                    .build()
+                    .getForObject(url, Customer.class, id));
 
-        if (customer == null && foundCustomer.isEmpty()) {
-            throw new CustomerNotFoundException(id);
+            customer.ifPresent(this.customerRepository::save);
+
+            return customer;
+        } catch (Exception e) {
+            return Optional.empty();
         }
-
-        System.out.println(customer);
-
-        return this.customerRepository.save(customer);
     }
 }

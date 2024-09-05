@@ -44,7 +44,7 @@ class OrderControllerIntegrationTest {
 
     @BeforeAll
     static void setUpWireMock() {
-        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(666));
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(9000));
         wireMockServer.start();
 
         final CreateOrderDto createOrderDto = CreateOrderFixture.createOrderDto();
@@ -123,6 +123,17 @@ class OrderControllerIntegrationTest {
         final OrderCreatedDto updatedOrderCreatedDto = objectMapper.readValue(updateResponse.getResponse().getContentAsString(), OrderCreatedDto.class);
         Assertions.assertEquals(newDescription, updatedOrderCreatedDto.description());
         Assertions.assertEquals(newStatus, updatedOrderCreatedDto.status());
+    }
+
+    @Test
+    void shouldReturn404WhenCreateOrderWithNonExistentCustomer() throws Exception {
+        final CreateOrderDto createOrderDto = CreateOrderFixture.createOrderDto("description", "non-existent-customer");
+
+        final String payload = objectMapper.writeValueAsString(createOrderDto);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 
     @Test
