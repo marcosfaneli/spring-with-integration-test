@@ -101,6 +101,17 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
+    void shouldReturn404WhenCreateOrderWithNonExistentCustomer() throws Exception {
+        final String description = "some description";
+        final CreateOrderDto createOrderDto = new CreateOrderDto(description, "2");
+        final String payload = objectMapper.writeValueAsString(createOrderDto);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
     void shouldReturn200WhenPutAnExistentOrder() throws Exception {
         final String description = "some description";
         final CreateOrderDto createOrderDto = new CreateOrderDto(description, "1");
