@@ -2,10 +2,9 @@ package com.seuprojeto.integrationtest.app.controller;
 
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
-import com.seuprojeto.integrationtest.domain.Order;
+import com.seuprojeto.integrationtest.app.usecase.*;
 import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
-import com.seuprojeto.integrationtest.infra.OrderRepository;
-import com.seuprojeto.integrationtest.integration.app.controller.dto.UpdateOrderDto;
+import com.seuprojeto.integrationtest.app.controller.dto.UpdateOrderDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,15 +15,32 @@ import java.util.UUID;
 @RequestMapping("/orders")
 public class OrderController {
 
-    private final OrderRepository repository;
+    private final CreateOrder createOrder;
 
-    public OrderController(OrderRepository repository) {
-        this.repository = repository;
+    private final ListOrders listOrders;
+
+    private final UpdateOrder updateOrder;
+
+    private final GetOrderById getOrderById;
+
+    private final DeleteOrder deleteOrder;
+
+    public OrderController(
+            CreateOrder createOrder,
+            ListOrders listOrders,
+            UpdateOrder updateOrder,
+            GetOrderById getOrderById,
+            DeleteOrder deleteOrder) {
+        this.createOrder = createOrder;
+        this.listOrders = listOrders;
+        this.updateOrder = updateOrder;
+        this.getOrderById = getOrderById;
+        this.deleteOrder = deleteOrder;
     }
 
     @GetMapping
     public List<OrderCreatedDto> getAllOrders() {
-        return this.repository.findAll().stream()
+        return this.listOrders.execute().stream()
                 .map(OrderCreatedDto::from)
                 .toList();
     }
@@ -32,32 +48,23 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderCreatedDto createOrder(@RequestBody CreateOrderDto createOrderDto) {
-        final Order order = Order.create(createOrderDto.description());
-        final Order orderSaved = this.repository.save(order);
-        return OrderCreatedDto.from(orderSaved);
+        return OrderCreatedDto.from(this.createOrder.execute(createOrderDto));
     }
 
     @PutMapping("/{id}")
     public OrderCreatedDto updateOrder(@PathVariable String id, @RequestBody UpdateOrderDto updateOrderDto) {
-        final UUID uuid = getUuid(id);
-        final Order order = this.repository.findById(uuid).orElseThrow();
-        order.update(updateOrderDto.description(), updateOrderDto.status());
-        final Order orderSaved = this.repository.save(order);
-        return OrderCreatedDto.from(orderSaved);
+        return OrderCreatedDto.from(this.updateOrder.execute(getUuid(id), updateOrderDto));
     }
 
     @GetMapping("/{id}")
     public OrderCreatedDto getOrder(@PathVariable String id) {
-        final UUID uuid = getUuid(id);
-        final Order order = this.repository.findById(uuid).orElseThrow(() -> new OrderNotFoundException(id));
-        return OrderCreatedDto.from(order);
+        return OrderCreatedDto.from(this.getOrderById.execute(getUuid(id)));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteOrder(@PathVariable String id) {
-        final UUID uuid = getUuid(id);
-        this.repository.deleteById(uuid);
+        this.deleteOrder.execute(getUuid(id));
     }
 
     private static UUID getUuid(String id) {

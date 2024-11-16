@@ -11,3 +11,12 @@ spring:
   h2:
     console:
     enabled: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    group-id: order-service
+    username: admin
+    password: admin
+
+customer:
+  api:
+    url: http://localhost:9999/api/customers

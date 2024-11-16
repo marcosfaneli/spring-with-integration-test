@@ -1,11 +1,22 @@
+server:
+  port: 8089
+
 spring:
-  application:
-  name: integration-test
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres?currentSchema=public
-    username: postgres
-    password: postgres
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
-    ddl-auto: update
+    hibernate:
+      ddl-auto: update
     show-sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    group-id: order-service
+    username: ${KAFKA_USERNAME}
+    password: ${KAFKA_PASSWORD}
+
+customer:
+  api:
+    url: http://localhost:9999/api/customers

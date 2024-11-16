@@ -16,6 +16,15 @@ Este projeto utiliza Docker para rodar uma instância do PostgreSQL. Siga os pas
 3. Execute o comando `docker compose up -d` para iniciar uma instância do PostgreSQL.
 4. O Docker Compose irá configurar o banco de dados conforme especificado no arquivo `docker-compose.yml` localizado na pasta `docker`.
 
+## Executando WireMock
+
+Para garantir integração com a api externa para consulta de dados do cliente será necessário subir uma instancia de WireMock.
+
+1. Abra um terminal na raiz do projeto
+2. Acesse a pasta mock `cd mock`
+
+3. Digite o seguinte commando `java -jar wiremock-standalone-3.8.0.jar --port 9999`
+
 ## Executando o Projeto
 
 Para executar o projeto, siga os passos abaixo:
