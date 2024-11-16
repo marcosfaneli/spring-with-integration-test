@@ -1,4 +1,4 @@
-package com.seuprojeto.integrationtest.infra;
+package com.seuprojeto.integrationtest.infra.database;
 
 import com.seuprojeto.integrationtest.domain.Order;
 import org.springframework.data.jpa.repository.JpaRepository;

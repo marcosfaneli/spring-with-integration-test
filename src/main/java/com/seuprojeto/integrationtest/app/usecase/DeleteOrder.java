@@ -1,6 +1,6 @@
 package com.seuprojeto.integrationtest.app.usecase;
 
-import com.seuprojeto.integrationtest.infra.OrderRepository;
+import com.seuprojeto.integrationtest.infra.database.OrderRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
