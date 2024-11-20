@@ -2,6 +2,7 @@ package com.seuprojeto.integrationtest.app.controller;
 
 import com.seuprojeto.integrationtest.domain.CustomerNotFoundException;
 import com.seuprojeto.integrationtest.domain.ErrorMessage;
+import com.seuprojeto.integrationtest.domain.InvalidStatusException;
 import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,6 +27,12 @@ public class HandlerException {
     @ExceptionHandler(CustomerNotFoundException.class)
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     public ErrorMessage handleCustomerNotFoundException(CustomerNotFoundException e) {
+        return this.createMap(e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidStatusException.class)
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleInvalidStatusException(InvalidStatusException e) {
         return this.createMap(e.getMessage());
     }
 

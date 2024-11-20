@@ -90,9 +90,9 @@ public class Order {
         return customerEmail;
     }
 
-    public void update(String description, String status) {
+    public void update(String description, Status status) {
         this.description = description;
-        this.status = Status.valueOf(status.toUpperCase());
+        this.status = status;
         this.updatedAt = LocalDateTime.now();
     }
 
