@@ -16,6 +16,14 @@ spring:
     group-id: order-service
     username: ${KAFKA_USERNAME}
     password: ${KAFKA_PASSWORD}
+springdoc:
+  api-docs:
+    enabled: true
+    path: /docs
+  swagger-ui:
+    enabled: true
+    path: /swagger
+
 
 customer:
   api:
