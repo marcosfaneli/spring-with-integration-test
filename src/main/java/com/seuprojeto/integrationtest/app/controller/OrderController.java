@@ -2,9 +2,9 @@ package com.seuprojeto.integrationtest.app.controller;
 
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
+import com.seuprojeto.integrationtest.app.controller.dto.UpdateOrderDto;
 import com.seuprojeto.integrationtest.app.usecase.*;
 import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
-import com.seuprojeto.integrationtest.app.controller.dto.UpdateOrderDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
