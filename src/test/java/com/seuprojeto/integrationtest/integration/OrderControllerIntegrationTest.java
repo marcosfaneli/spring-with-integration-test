@@ -233,4 +233,23 @@ class OrderControllerIntegrationTest {
                 .andReturn();
     }
 
+    @Test
+    void shouldReturn400WhenUpdateOrderWithInvalidStatus() throws Exception {
+        final CreateOrderDto createOrderDto = new CreateOrderDto("some description", "1");
+        final String payload = objectMapper.writeValueAsString(createOrderDto);
+
+        final MvcResult response = this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        final OrderCreatedDto orderCreatedDto = objectMapper.readValue(response.getResponse().getContentAsString(), OrderCreatedDto.class);
+
+        final UpdateOrderDto updateOrderDto = new UpdateOrderDto("new description", "INVALID");
+        final String updatePayload = objectMapper.writeValueAsString(updateOrderDto);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.put(ORDER_URL + "/" + orderCreatedDto.id()).content(updatePayload).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
 }
