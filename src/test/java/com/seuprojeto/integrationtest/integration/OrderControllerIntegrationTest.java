@@ -5,9 +5,10 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
-import com.seuprojeto.integrationtest.infra.database.OrderRepository;
 import com.seuprojeto.integrationtest.app.controller.dto.UpdateOrderDto;
+import com.seuprojeto.integrationtest.infra.database.OrderRepository;
 import com.seuprojeto.integrationtest.infra.producer.dto.OrderCreatedMessage;
+import com.seuprojeto.integrationtest.infra.producer.dto.OrderUpdatedMessage;
 import com.seuprojeto.integrationtest.shared.JacksonConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableConfigurationProperties
 //@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@EmbeddedKafka(partitions = 1, topics = { "created-order" }, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
+@EmbeddedKafka(partitions = 1, topics = { "created-order", "updated-order" }, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
 class OrderControllerIntegrationTest {
 
     @Autowired
@@ -167,6 +168,20 @@ class OrderControllerIntegrationTest {
         final OrderCreatedDto updatedOrderCreatedDto = objectMapper.readValue(updateResponse.getResponse().getContentAsString(), OrderCreatedDto.class);
         Assertions.assertEquals(newDescription, updatedOrderCreatedDto.description());
         Assertions.assertEquals(newStatus, updatedOrderCreatedDto.status());
+
+        try (var consumer = consumerFactory.createConsumer()) {
+            embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, "updated-order");
+            ConsumerRecord<String, String> singleRecord = KafkaTestUtils.getSingleRecord(consumer, "updated-order");
+
+            Assertions.assertNotNull(singleRecord);
+
+            OrderUpdatedMessage orderUpdatedMessage = objectMapper.readValue(singleRecord.value(), OrderUpdatedMessage.class);
+            Assertions.assertEquals(orderCreatedDto.id(), orderUpdatedMessage.getId());
+            Assertions.assertEquals(orderCreatedDto.customerCode(), orderUpdatedMessage.getCustomerId());
+            Assertions.assertNotNull(orderUpdatedMessage.getCreatedAt());
+            Assertions.assertNotNull(orderUpdatedMessage.getUpdatedAt());
+            Assertions.assertEquals(newStatus, orderUpdatedMessage.getStatus());
+        }
     }
 
     @Test
@@ -217,4 +232,5 @@ class OrderControllerIntegrationTest {
                 .andExpect(status().isNotFound())
                 .andReturn();
     }
+
 }
