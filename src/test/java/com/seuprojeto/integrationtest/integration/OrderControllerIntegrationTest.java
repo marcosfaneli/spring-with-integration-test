@@ -91,7 +91,24 @@ class OrderControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Assertions.assertTrue(response.getResponse().getContentAsString().contains("[]"));
+        Assertions.assertTrue(response.getResponse().getContentAsString().contains("{\"page\":0,\"size\":10,\"total\":0,\"data\":[]}"));
+    }
+
+    @Test
+    void shouldReturn200WhenGetAllOrdersWithQuery() throws Exception {
+        final String description = "some description";
+        final CreateOrderDto createOrderDto = new CreateOrderDto(description, "1");
+        final String payload = objectMapper.writeValueAsString(createOrderDto);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        final MvcResult response = mockMvc.perform(MockMvcRequestBuilders.get(ORDER_URL + "?query=some"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Assertions.assertTrue(response.getResponse().getContentAsString().contains(description));
     }
 
     @Test

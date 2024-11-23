@@ -2,9 +2,12 @@ package com.seuprojeto.integrationtest.app.controller;
 
 import com.seuprojeto.integrationtest.app.controller.dto.CreateOrderDto;
 import com.seuprojeto.integrationtest.app.controller.dto.OrderCreatedDto;
+import com.seuprojeto.integrationtest.app.controller.dto.PaginatedResponseDto;
 import com.seuprojeto.integrationtest.app.controller.dto.UpdateOrderDto;
 import com.seuprojeto.integrationtest.app.usecase.*;
 import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,10 +42,12 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<OrderCreatedDto> getAllOrders() {
-        return this.listOrders.execute().stream()
-                .map(OrderCreatedDto::from)
-                .toList();
+    public PaginatedResponseDto<OrderCreatedDto> getAllOrders(
+            @PageableDefault(size = 10) Pageable pageable,
+            @RequestParam(required = false) String query) {
+        final var orders = this.listOrders.execute(query, pageable);
+        final List<OrderCreatedDto> ordersDto = orders.map(OrderCreatedDto::from).getContent();
+        return new PaginatedResponseDto<>(orders.getNumber(), orders.getSize(), orders.getTotalElements(), ordersDto);
     }
 
     @PostMapping

@@ -2,9 +2,9 @@ package com.seuprojeto.integrationtest.app.usecase;
 
 import com.seuprojeto.integrationtest.domain.Order;
 import com.seuprojeto.integrationtest.infra.database.OrderRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ListOrders {
@@ -15,7 +15,10 @@ public class ListOrders {
         this.repository = repository;
     }
 
-    public List<Order> execute() {
-        return this.repository.findAll();
+    public Page<Order> execute(String query, Pageable pageable) {
+        if (query != null) {
+            return this.repository.findByDescriptionContaining(query, pageable);
+        }
+        return this.repository.findAll(pageable);
     }
 }
