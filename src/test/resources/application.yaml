@@ -16,6 +16,10 @@ spring:
     group-id: order-service
     username: admin
     password: admin
+web:
+  cors:
+    allowed-origins: /**
+    max-age: 3600
 
 customer:
   api:
