@@ -23,7 +23,10 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger
-
+web:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+    max-age: 3600
 
 customer:
   api:
