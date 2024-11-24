@@ -6,6 +6,7 @@ import com.seuprojeto.integrationtest.app.controller.dto.PaginatedResponseDto;
 import com.seuprojeto.integrationtest.app.controller.dto.UpdateOrderDto;
 import com.seuprojeto.integrationtest.app.usecase.*;
 import com.seuprojeto.integrationtest.domain.OrderNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -52,7 +53,7 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderCreatedDto createOrder(@RequestBody CreateOrderDto createOrderDto) {
+    public OrderCreatedDto createOrder(@Valid @RequestBody CreateOrderDto createOrderDto) {
         return OrderCreatedDto.from(this.createOrder.execute(createOrderDto));
     }
 

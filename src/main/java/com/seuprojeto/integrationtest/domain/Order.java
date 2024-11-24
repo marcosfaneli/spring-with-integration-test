@@ -1,6 +1,8 @@
 package com.seuprojeto.integrationtest.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,10 +14,14 @@ public class Order {
     @Id
 //    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    @NotEmpty
     private String description;
+    @NotNull
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @NotNull
     private Status status;
+    @NotEmpty
     private String customerCode;
     private String customerName;
     private String customerEmail;
