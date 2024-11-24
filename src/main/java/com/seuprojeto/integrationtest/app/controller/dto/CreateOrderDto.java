@@ -1,4 +1,8 @@
 package com.seuprojeto.integrationtest.app.controller.dto;
 
-public record CreateOrderDto(String description, String customerCode) {
+import jakarta.validation.constraints.NotEmpty;
+
+public record CreateOrderDto(
+        @NotEmpty(message = "Description is required") String description,
+        @NotEmpty(message = "CustomerCode is required") String customerCode) {
 }

@@ -269,4 +269,14 @@ class OrderControllerIntegrationTest {
                 .andReturn();
     }
 
+    @Test
+    void shouldReturn400WhenCreateOrderWithInvalidDescription() throws Exception {
+        final CreateOrderDto createOrderDto = new CreateOrderDto("", "1");
+        final String payload = objectMapper.writeValueAsString(createOrderDto);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post(ORDER_URL).content(payload).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
 }
